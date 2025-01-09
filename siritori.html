@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人工知能としりとり</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        #game-area {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        input, button {
+            font-size: 16px;
+            padding: 8px 10px;
+            margin: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #last-word, #message {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        #message {
+            color: red;
+            font-weight: bold;
+        }
+        #used-words {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>人工知能としりとり</h1>
+    <div id="game-area">
+        <p id="last-word">最初の言葉: りんご</p>
+        <input type="text" id="user-input" placeholder="あなたの言葉を入力">
+        <button onclick="play()">送信</button>
+        <p id="message"></p>
+        <div id="used-words">使用済み単語: りんご</div>
+    </div>
+
+    <script>
+        const wordsUsed = ["りんご"]; // 使用済み単語
+        const wordDatabase = [
+            "ごりら", "らっぱ", "ぱんだ", "だるま", "まんじゅう", "うさぎ", "ぎんこう",
+            "うみ", "みかん", "いちご", "ごま", "まくら", "らくだ", "だんご", "ごりむちゅう"
+        ]; // AI用単語データベース
+
+        function play() {
+            const userInput = document.getElementById("user-input").value.trim();
+            const lastWord = wordsUsed[wordsUsed.length - 1];
+            const lastChar = lastWord.slice(-1); // 前の単語の最後の文字
+
+            // ユーザー入力のチェック
+            if (!userInput) {
+                showMessage("単語を入力してください！");
+                return;
+            }
+
+            if (userInput[0] !== lastChar) {
+                showMessage(`"${lastChar}" から始まる単語を入力してください！`);
+                return;
+            }
+
+            if (wordsUsed.includes(userInput)) {
+                showMessage("その単語はすでに使われています！");
+                return;
+            }
+
+            if (userInput.slice(-1) === "ん") {
+                showMessage("「ん」で終わる単語は負けです！ AIの勝ち！");
+                return;
+            }
+
+            // ユーザーの単語を登録
+            wordsUsed.push(userInput);
+
+            // AIのターン
+            const aiWord = getAiWord(userInput.slice(-1));
+            if (!aiWord) {
+                showMessage("AIは返せる単語がありません！あなたの勝ちです！");
+                return;
+            }
+
+            wordsUsed.push(aiWord);
+            updateGameArea(aiWord);
+        }
+
+        function getAiWord(lastChar) {
+            const candidates = wordDatabase.filter(
+                word => word[0] === lastChar && !wordsUsed.includes(word)
+            );
+            if (candidates.length === 0) {
+                return null; // 返せる単語がない
+            }
+            return candidates[Math.floor(Math.random() * candidates.length)]; // ランダムに選ぶ
+        }
+
+        function updateGameArea(aiWord) {
+            document.getElementById("last-word").textContent = `AIの言葉: ${aiWord}`;
+            document.getElementById("user-input").value = "";
+            updateUsedWords();
+            showMessage(""); // メッセージをクリア
+        }
+
+        function updateUsedWords() {
+            document.getElementById("used-words").textContent = "使用済み単語: " + wordsUsed.join(", ");
+        }
+
+        function showMessage(msg) {
+            document.getElementById("message").textContent = msg;
+        }
+    </script>
+</body>
+</html>
